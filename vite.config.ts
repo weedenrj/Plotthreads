@@ -13,7 +13,7 @@ export default defineConfig({
       devOptions: {
         enabled: true,
       },
-      includeAssets: ['logo.svg'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png'],
       manifest: {
         name: 'Plotthreads',
         short_name: 'Plotthreads',
@@ -48,7 +48,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{js,css,html,ico,woff2}', '**/pwa-*.png', '**/maskable-*.png', '**/apple-touch-icon-*.png'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
