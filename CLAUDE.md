@@ -78,6 +78,26 @@ Reusable UI building blocks following composition patterns.
 - **ui/**: Base primitives (Button, Input, Card) - no business logic
 - **features/**: Domain-specific components that compose primitives
 
+#### Icon Component (`src/components/Icon.tsx`)
+
+Centralized icon system using a name-based lookup. All SVG icons are defined in one place.
+
+```typescript
+import { Icon, type IconName } from './components/Icon'
+
+// Usage
+<Icon name="thread" />
+<Icon name="connection" className="h-8 w-8" />
+
+// Available icons (IconName type):
+// 'thread' | 'connection' | 'timeline' | 'offline' | 'export' | 'secure'
+```
+
+**Adding new icons:**
+1. Add the icon name to the `IconName` type union
+2. Add the SVG path(s) to the `icons` record
+3. Icons use a 24x24 viewBox with stroke-based rendering (strokeWidth 1.5)
+
 ### Hooks (`src/hooks/`)
 Custom hooks that encapsulate reusable logic.
 - State management patterns

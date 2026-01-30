@@ -6,28 +6,76 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {
-      colors: {
-        // Primary Palette (Inkwell) - backgrounds, sidebars, containers
-        ink: {
-          deep: '#1B1E26',      // Main Background
-          midnight: '#2A2F3B',  // Cards/Section Backgrounds
-          dusk: '#3F4656',      // Borders and Hover States
-        },
-        // Accent Palette (Terracotta) - CTAs, active threads, progress
-        terracotta: {
-          burnt: '#C25E44',     // Main Action Buttons/Links
-          spool: '#E07A5F',     // Highlighting important nodes
-          ember: '#8D4231',     // Secondary buttons/Depressed states
-        },
-        // Neutral Palette (Oatmeal) - typography, icons, hints
-        oatmeal: {
-          parchment: '#F2E9E4', // Primary Text/Headers
-          grain: '#D9D1CC',     // Secondary Text/Metadata
-          mist: '#9A8C98',      // Disabled states/Breadcrumbs
-        },
+    colors: {
+      transparent: 'transparent',
+      current: 'currentColor',
+      brandy: {
+        50: '#fcede9',
+        100: '#f9dbd2',
+        200: '#f2b6a6',
+        300: '#ec9279',
+        400: '#e66e4c',
+        500: '#df4920',
+        600: '#b33b19',
+        700: '#862c13',
+        800: '#591d0d',
+        900: '#2d0f06',
+        950: '#1f0a04',
+      },
+      porcelain: {
+        50: '#f5faeb',
+        100: '#ebf5d6',
+        200: '#d6ebad',
+        300: '#c2e085',
+        400: '#add65c',
+        500: '#99cc33',
+        600: '#7aa329',
+        700: '#5c7a1f',
+        800: '#3d5214',
+        900: '#1f290a',
+        950: '#151d07',
+      },
+      tan: {
+        50: '#f8f3ec',
+        100: '#f1e7da',
+        200: '#e3cfb5',
+        300: '#d6b78f',
+        400: '#c89f6a',
+        500: '#ba8745',
+        600: '#956c37',
+        700: '#705129',
+        800: '#4a361c',
+        900: '#251b0e',
+        950: '#1a130a',
+      },
+      'shadow-grey': {
+        50: '#f0f1f5',
+        100: '#e0e4eb',
+        200: '#c1c8d7',
+        300: '#a2adc3',
+        400: '#8491ae',
+        500: '#65769a',
+        600: '#515e7b',
+        700: '#3c475d',
+        800: '#282f3e',
+        900: '#14181f',
+        950: '#0e1016',
+      },
+      ivory: {
+        50: '#faf9eb',
+        100: '#f5f2d6',
+        200: '#ebe5ad',
+        300: '#e0d985',
+        400: '#d6cc5c',
+        500: '#ccbf33',
+        600: '#a39929',
+        700: '#7a731f',
+        800: '#524d14',
+        900: '#29260a',
+        950: '#1d1b07',
       },
     },
+    extend: {},
   },
   plugins: [],
 } satisfies Config
