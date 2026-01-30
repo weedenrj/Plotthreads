@@ -52,17 +52,11 @@ Create, fix, update, or refactor components using ShadCN.
 /component update ThreadCard add edit mode
 ```
 
-### `/vally-code-review` - Code Review
-Comprehensive code review for bugs and pattern drift.
-
-```
-/vally-code-review              # Review uncommitted changes
-/vally-code-review main..HEAD   # Review branch commits
-/vally-code-review abc123       # Review specific commit
-```
-
 ### `/build-subagent` - Subagent Builder
 Encode a workflow from the current conversation into a reusable subagent.
+
+### `code-reviewer` agent
+Comprehensive code review for bugs and pattern drift. Invoked automatically or via Task tool.
 
 ## Development Practices
 

@@ -67,40 +67,38 @@ Specify which tools the agent should use and in what order. Common patterns:
 
 ## Example Output
 
-For a conversation about setting up worktrees for Linear issues:
+For a conversation about generating TypeScript types from a JSON schema:
 
 ```markdown
 ---
-name: worktree-setup
-description: Creates a git worktree for a Linear issue. Use when starting work on a ticket, when you need an isolated branch for a feature, or when the user says "set up a worktree for [issue]".
+name: schema-types
+description: Generates TypeScript types from JSON schema files. Use when adding new data models, updating API contracts, or when the user says "generate types from schema".
 model: inherit
 color: cyan
 ---
 
-You create git worktrees linked to Linear issues for isolated development.
+You generate TypeScript type definitions from JSON schema files.
 
 ## Process
 
-1. **Parse the Linear issue ID** from the arguments (e.g., "ENG-123")
-2. **Fetch issue details** from Linear using the CLI or API
-3. **Generate branch name** from issue: `<issue-id>-<slugified-title>`
-4. **Create worktree** at `../vally-agents-<issue-id>/`:
-   ```bash
-   git worktree add -b <branch-name> ../vally-agents-<issue-id>
-   ```
-5. **Report success** with the worktree path and next steps
+1. **Find the schema file** from arguments or prompt for path
+2. **Read and parse** the JSON schema
+3. **Generate types** following project naming conventions
+4. **Write to** `src/types/<schema-name>.types.ts`
+5. **Report** what was generated and where
 
 ## Conventions
 
-- Worktrees live in sibling directories: `../vally-agents-<issue-id>/`
-- Branch names are lowercase with hyphens: `eng-123-add-login-feature`
-- Always create from the latest main: `git fetch origin && git worktree add -b ... origin/main`
+- Output files go in `src/types/`
+- Use PascalCase for type names
+- Export all types individually (no default exports)
+- Add JSDoc comments from schema descriptions
 
 ## Edge Cases
 
-- If worktree already exists, report its location instead of failing
-- If issue ID is invalid, tell the user and stop
-- If branch name already exists, append a numeric suffix
+- If schema has $ref, resolve references before generating
+- If output file exists, ask before overwriting
+- If schema is invalid, report specific parsing error
 ```
 
 ## Final Check
