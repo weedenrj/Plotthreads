@@ -1,9 +1,17 @@
 import { initTRPC } from '@trpc/server'
 import type { CreateHTTPContextOptions } from '@trpc/server/adapters/standalone'
 import { sql } from './db'
+import { parseCookies } from './lib/cookies'
+import { decryptSession, type SessionData } from './lib/session'
+
+export type User = SessionData['user'] | null
 
 export function createContext({ req, res }: CreateHTTPContextOptions) {
-  return { sql, req, res }
+  const cookies = parseCookies(req.headers.cookie)
+  const session = cookies.session ? decryptSession(cookies.session) : null
+  const user: User = session?.user ?? null
+
+  return { sql, req, res, user }
 }
 
 export type Context = Awaited<ReturnType<typeof createContext>>
