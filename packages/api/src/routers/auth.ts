@@ -23,8 +23,8 @@ export const authRouter = router({
       encryptOAuthState(oauthState),
       {
         httpOnly: true,
-        secure: SESSION_COOKIE_OPTIONS.secure,
-        sameSite: SESSION_COOKIE_OPTIONS.sameSite,
+        secure: true,
+        sameSite: 'none',
         path: '/',
         maxAge: 60 * 10,
       }
