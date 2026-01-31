@@ -4,35 +4,19 @@ import {
   generateCodeVerifier,
   createAuthUrl,
   encryptOAuthState,
-  type OAuthState,
 } from '../lib/oauth'
 import { serializeCookie, SESSION_COOKIE_OPTIONS } from '../lib/cookies'
 
-const OAUTH_STATE_COOKIE = 'oauth_state'
 const SESSION_COOKIE = 'session'
 
 export const authRouter = router({
-  getAuthUrl: publicProcedure.query(({ ctx }) => {
-    const oauthState: OAuthState = {
+  getAuthUrl: publicProcedure.query(() => {
+    const encodedState = encryptOAuthState({
       state: generateState(),
       codeVerifier: generateCodeVerifier(),
-    }
+    })
 
-    const stateCookie = serializeCookie(
-      OAUTH_STATE_COOKIE,
-      encryptOAuthState(oauthState),
-      {
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none',
-        path: '/',
-        maxAge: 60 * 10,
-      }
-    )
-
-    ctx.res.setHeader('Set-Cookie', stateCookie)
-
-    return { url: createAuthUrl(oauthState) }
+    return { url: createAuthUrl(encodedState) }
   }),
 
   me: publicProcedure.query(({ ctx }) => {

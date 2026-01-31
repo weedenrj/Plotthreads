@@ -53,13 +53,16 @@ export function decryptOAuthState(encrypted: string): OAuthState {
   return OAuthStateSchema.parse(data)
 }
 
-export function createAuthUrl(oauthState: OAuthState): string {
+export function createAuthUrl(encodedState: string): string {
+  // Decode to get the code verifier for PKCE challenge
+  const oauthState = decryptOAuthState(encodedState)
+
   const params = new URLSearchParams({
     client_id: getClientId(),
     redirect_uri: getRedirectUri(),
     response_type: 'code',
     scope: SCOPES.join(' '),
-    state: oauthState.state,
+    state: encodedState, // Pass encrypted state through Google
     code_challenge: generateCodeChallenge(oauthState.codeVerifier),
     code_challenge_method: 'S256',
     access_type: 'offline',

@@ -6,7 +6,7 @@ import { appRouter } from './router'
 import { createContext } from './trpc'
 import { sql } from './db'
 import { migrate } from './migrate'
-import { parseCookies, serializeCookie, SESSION_COOKIE_OPTIONS } from './lib/cookies'
+import { serializeCookie, SESSION_COOKIE_OPTIONS } from './lib/cookies'
 import { encryptSession } from './lib/session'
 import { exchangeCodeForTokens, fetchGoogleUser, decryptOAuthState } from './lib/oauth'
 
@@ -34,25 +34,12 @@ async function handleOAuthCallback(
     return
   }
 
-  const cookies = parseCookies(req.headers.cookie)
-  const stateCookie = cookies.oauth_state
-  if (!stateCookie) {
-    res.writeHead(302, { Location: `${frontendUrl}?error=missing_state` })
-    res.end()
-    return
-  }
-
+  // State is now passed through URL (encrypted), not cookies
   let oauthState
   try {
-    oauthState = decryptOAuthState(stateCookie)
+    oauthState = decryptOAuthState(state)
   } catch {
     res.writeHead(302, { Location: `${frontendUrl}?error=invalid_state` })
-    res.end()
-    return
-  }
-
-  if (oauthState.state !== state) {
-    res.writeHead(302, { Location: `${frontendUrl}?error=state_mismatch` })
     res.end()
     return
   }
@@ -74,14 +61,10 @@ async function handleOAuthCallback(
     })
 
     const sessionCookie = serializeCookie('session', session, SESSION_COOKIE_OPTIONS)
-    const clearStateCookie = serializeCookie('oauth_state', '', {
-      ...SESSION_COOKIE_OPTIONS,
-      maxAge: 0,
-    })
 
     res.writeHead(302, {
       Location: frontendUrl,
-      'Set-Cookie': [sessionCookie, clearStateCookie],
+      'Set-Cookie': sessionCookie,
     })
     res.end()
   } catch (err) {
