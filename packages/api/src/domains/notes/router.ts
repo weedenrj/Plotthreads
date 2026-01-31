@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { router, publicProcedure } from '../../trpc'
+import { router, publicProcedure, protectedProcedure } from '../../trpc'
 import { noteQueries } from './queries'
 
 export const notesRouter = router({
@@ -12,21 +12,21 @@ export const notesRouter = router({
       return note ?? null
     }),
 
-  create: publicProcedure
+  create: protectedProcedure
     .input(z.object({ content: z.string().min(1) }))
     .mutation(async ({ input, ctx }) => {
       const [note] = await noteQueries.create(ctx.sql, input.content)
       return note
     }),
 
-  update: publicProcedure
+  update: protectedProcedure
     .input(z.object({ id: z.number(), content: z.string().min(1) }))
     .mutation(async ({ input, ctx }) => {
       const [note] = await noteQueries.update(ctx.sql, input.id, input.content)
       return note ?? null
     }),
 
-  delete: publicProcedure
+  delete: protectedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
       await noteQueries.delete(ctx.sql, input.id)

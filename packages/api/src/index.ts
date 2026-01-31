@@ -1,13 +1,14 @@
 import { createHTTPServer } from '@trpc/server/adapters/standalone'
 import type { IncomingMessage, ServerResponse } from 'http'
 import cors from 'cors'
+import { ZodError } from 'zod'
 import { appRouter } from './router'
 import { createContext } from './trpc'
 import { sql } from './db'
 import { migrate } from './migrate'
 import { parseCookies, serializeCookie, SESSION_COOKIE_OPTIONS } from './lib/cookies'
 import { encryptSession } from './lib/session'
-import { exchangeCodeForTokens, fetchGoogleUser, type OAuthState } from './lib/oauth'
+import { exchangeCodeForTokens, fetchGoogleUser, decryptOAuthState } from './lib/oauth'
 
 const port = parseInt(process.env.PORT || '3001')
 const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'
@@ -21,7 +22,6 @@ async function handleOAuthCallback(
   const state = url.searchParams.get('state')
   const error = url.searchParams.get('error')
 
-  // Handle OAuth errors from Google
   if (error) {
     res.writeHead(302, { Location: `${frontendUrl}?error=${error}` })
     res.end()
@@ -34,7 +34,6 @@ async function handleOAuthCallback(
     return
   }
 
-  // Parse OAuth state from cookie
   const cookies = parseCookies(req.headers.cookie)
   const stateCookie = cookies.oauth_state
   if (!stateCookie) {
@@ -43,16 +42,15 @@ async function handleOAuthCallback(
     return
   }
 
-  let oauthState: OAuthState
+  let oauthState
   try {
-    oauthState = JSON.parse(Buffer.from(stateCookie, 'base64').toString())
+    oauthState = decryptOAuthState(stateCookie)
   } catch {
     res.writeHead(302, { Location: `${frontendUrl}?error=invalid_state` })
     res.end()
     return
   }
 
-  // Validate state parameter
   if (oauthState.state !== state) {
     res.writeHead(302, { Location: `${frontendUrl}?error=state_mismatch` })
     res.end()
@@ -60,13 +58,9 @@ async function handleOAuthCallback(
   }
 
   try {
-    // Exchange code for tokens
     const tokens = await exchangeCodeForTokens(code, oauthState.codeVerifier)
-
-    // Fetch user info
     const googleUser = await fetchGoogleUser(tokens.access_token)
 
-    // Create session
     const session = encryptSession({
       user: {
         googleId: googleUser.id,
@@ -79,7 +73,6 @@ async function handleOAuthCallback(
       expiresAt: Date.now() + tokens.expires_in * 1000,
     })
 
-    // Set session cookie and clear OAuth state cookie
     const sessionCookie = serializeCookie('session', session, SESSION_COOKIE_OPTIONS)
     const clearStateCookie = serializeCookie('oauth_state', '', {
       ...SESSION_COOKIE_OPTIONS,
@@ -93,7 +86,8 @@ async function handleOAuthCallback(
     res.end()
   } catch (err) {
     console.error('OAuth callback error:', err)
-    res.writeHead(302, { Location: `${frontendUrl}?error=auth_failed` })
+    const errorCode = err instanceof ZodError ? 'invalid_account' : 'auth_failed'
+    res.writeHead(302, { Location: `${frontendUrl}?error=${errorCode}` })
     res.end()
   }
 }
@@ -110,20 +104,17 @@ async function start() {
     }),
   })
 
-  // Intercept requests before tRPC handles them
   const originalListeners = server.listeners('request').slice()
   server.removeAllListeners('request')
 
   server.on('request', async (req: IncomingMessage, res: ServerResponse) => {
     const url = new URL(req.url!, `http://${req.headers.host}`)
 
-    // Handle OAuth callback outside of tRPC
     if (url.pathname === '/auth/callback') {
       await handleOAuthCallback(req, res)
       return
     }
 
-    // Pass everything else to tRPC
     for (const listener of originalListeners) {
       ;(listener as (req: IncomingMessage, res: ServerResponse) => void)(req, res)
     }

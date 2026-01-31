@@ -21,6 +21,7 @@ function App() {
               <img
                 src={user?.picture}
                 alt={user?.name}
+                referrerPolicy="no-referrer"
                 className="h-8 w-8 rounded-full"
               />
               <span className="text-sm text-tan-300">{user?.name}</span>

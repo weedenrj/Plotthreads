@@ -1,4 +1,6 @@
 import crypto from 'crypto'
+import { z } from 'zod'
+import { encrypt, decrypt } from './crypto'
 
 const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth'
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
@@ -35,9 +37,20 @@ export function generateCodeChallenge(verifier: string): string {
   return crypto.createHash('sha256').update(verifier).digest('base64url')
 }
 
-export interface OAuthState {
-  state: string
-  codeVerifier: string
+const OAuthStateSchema = z.object({
+  state: z.string().length(64),
+  codeVerifier: z.string().min(43),
+})
+
+export type OAuthState = z.infer<typeof OAuthStateSchema>
+
+export function encryptOAuthState(state: OAuthState): string {
+  return encrypt(state)
+}
+
+export function decryptOAuthState(encrypted: string): OAuthState {
+  const data = decrypt(encrypted)
+  return OAuthStateSchema.parse(data)
 }
 
 export function createAuthUrl(oauthState: OAuthState): string {
@@ -56,13 +69,15 @@ export function createAuthUrl(oauthState: OAuthState): string {
   return `${GOOGLE_AUTH_URL}?${params.toString()}`
 }
 
-export interface TokenResponse {
-  access_token: string
-  refresh_token?: string
-  expires_in: number
-  token_type: string
-  scope: string
-}
+const TokenResponseSchema = z.object({
+  access_token: z.string().min(1),
+  refresh_token: z.string().optional(),
+  expires_in: z.number().positive(),
+  token_type: z.literal('Bearer'),
+  scope: z.string().min(1),
+})
+
+export type TokenResponse = z.infer<typeof TokenResponseSchema>
 
 export async function exchangeCodeForTokens(
   code: string,
@@ -83,21 +98,23 @@ export async function exchangeCodeForTokens(
 
   if (!response.ok) {
     const error = await response.text()
-    throw new Error(`Token exchange failed: ${error}`)
+    throw new Error(`Token exchange failed: ${response.status} ${error}`)
   }
 
-  return response.json()
+  return TokenResponseSchema.parse(await response.json())
 }
 
-export interface GoogleUser {
-  id: string
-  email: string
-  verified_email: boolean
-  name: string
-  given_name: string
-  family_name: string
-  picture: string
-}
+const GoogleUserSchema = z.object({
+  id: z.string().min(1),
+  email: z.string().email(),
+  verified_email: z.literal(true),
+  name: z.string().min(1),
+  given_name: z.string(),
+  family_name: z.string(),
+  picture: z.string().url(),
+})
+
+export type GoogleUser = z.infer<typeof GoogleUserSchema>
 
 export async function fetchGoogleUser(accessToken: string): Promise<GoogleUser> {
   const response = await fetch(GOOGLE_USERINFO_URL, {
@@ -105,8 +122,8 @@ export async function fetchGoogleUser(accessToken: string): Promise<GoogleUser> 
   })
 
   if (!response.ok) {
-    throw new Error('Failed to fetch user info')
+    throw new Error(`User fetch failed: ${response.status}`)
   }
 
-  return response.json()
+  return GoogleUserSchema.parse(await response.json())
 }

@@ -3,6 +3,7 @@ import {
   generateState,
   generateCodeVerifier,
   createAuthUrl,
+  encryptOAuthState,
   type OAuthState,
 } from '../lib/oauth'
 import { serializeCookie, SESSION_COOKIE_OPTIONS } from '../lib/cookies'
@@ -17,16 +18,15 @@ export const authRouter = router({
       codeVerifier: generateCodeVerifier(),
     }
 
-    // Store state in temporary cookie (short-lived, for callback validation)
     const stateCookie = serializeCookie(
       OAUTH_STATE_COOKIE,
-      Buffer.from(JSON.stringify(oauthState)).toString('base64'),
+      encryptOAuthState(oauthState),
       {
         httpOnly: true,
         secure: SESSION_COOKIE_OPTIONS.secure,
         sameSite: SESSION_COOKIE_OPTIONS.sameSite,
         path: '/',
-        maxAge: 60 * 10, // 10 minutes
+        maxAge: 60 * 10,
       }
     )
 
@@ -40,7 +40,6 @@ export const authRouter = router({
   }),
 
   logout: publicProcedure.mutation(({ ctx }) => {
-    // Clear session cookie
     const clearCookie = serializeCookie(SESSION_COOKIE, '', {
       ...SESSION_COOKIE_OPTIONS,
       maxAge: 0,

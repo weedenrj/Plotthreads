@@ -1,20 +1,4 @@
-import crypto from 'crypto'
-
-const ALGORITHM = 'aes-256-gcm'
-const IV_LENGTH = 12
-
-function getSessionSecret(): Buffer {
-  const secret = process.env.SESSION_SECRET
-  if (!secret) {
-    throw new Error('SESSION_SECRET environment variable is required')
-  }
-  // Expect hex-encoded 32-byte key
-  const key = Buffer.from(secret, 'hex')
-  if (key.length !== 32) {
-    throw new Error('SESSION_SECRET must be 32 bytes (64 hex characters)')
-  }
-  return key
-}
+import { encrypt, decrypt } from './crypto'
 
 export interface SessionData {
   user: {
@@ -25,45 +9,28 @@ export interface SessionData {
   }
   accessToken: string
   refreshToken: string
-  expiresAt: number
+  expiresAt: number // Google access token expiry, not session expiry
 }
 
 export function encryptSession(data: SessionData): string {
-  const key = getSessionSecret()
-  const iv = crypto.randomBytes(IV_LENGTH)
-  const cipher = crypto.createCipheriv(ALGORITHM, key, iv)
-
-  const json = JSON.stringify(data)
-  const encrypted = Buffer.concat([cipher.update(json, 'utf8'), cipher.final()])
-  const authTag = cipher.getAuthTag()
-
-  // Format: iv:authTag:encrypted (all base64)
-  return [
-    iv.toString('base64'),
-    authTag.toString('base64'),
-    encrypted.toString('base64'),
-  ].join('.')
+  return encrypt(data)
 }
 
-export function decryptSession(cookie: string): SessionData | null {
-  try {
-    const key = getSessionSecret()
-    const [ivB64, authTagB64, encryptedB64] = cookie.split('.')
-
-    if (!ivB64 || !authTagB64 || !encryptedB64) {
-      return null
-    }
-
-    const iv = Buffer.from(ivB64, 'base64')
-    const authTag = Buffer.from(authTagB64, 'base64')
-    const encrypted = Buffer.from(encryptedB64, 'base64')
-
-    const decipher = crypto.createDecipheriv(ALGORITHM, key, iv)
-    decipher.setAuthTag(authTag)
-
-    const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()])
-    return JSON.parse(decrypted.toString('utf8'))
-  } catch {
-    return null
+// Throws on tampered/malformed data - crypto errors bubble up
+export function decryptSessionOrThrow(cookie: string): SessionData {
+  if (!cookie) {
+    throw new Error('Missing session cookie')
   }
+  return decrypt(cookie) as SessionData
+}
+
+// For context creation - null means "no cookie", crypto errors still throw
+export function decryptSession(cookie: string): SessionData | null {
+  if (!cookie) return null
+  return decryptSessionOrThrow(cookie)
+}
+
+// Check if Google access token needs refresh (for API calls to Google)
+export function isAccessTokenExpired(session: SessionData): boolean {
+  return session.expiresAt < Date.now()
 }
