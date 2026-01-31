@@ -1,7 +1,10 @@
+import { config } from 'dotenv'
+config({ path: '../../.env.local' })
+
 import postgres from 'postgres'
 
 export const sql = postgres(process.env.DATABASE_URL!, {
-  ssl: process.env.NODE_ENV === 'production' ? 'require' : false,
+  ssl: process.env.DATABASE_URL?.includes('localhost') ? false : 'require',
 })
 
 export async function checkDb() {
