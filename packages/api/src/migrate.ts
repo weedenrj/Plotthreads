@@ -36,7 +36,7 @@ export async function migrate(sql: Sql): Promise<void> {
     console.log(`Applying migration: ${file}`)
     await sql.begin(async (tx) => {
       await tx.unsafe(content)
-      await (tx as unknown as Sql)`INSERT INTO _migrations (name) VALUES (${file})`
+      await `INSERT INTO _migrations (name) VALUES (${file})`
     })
     console.log(`Applied: ${file}`)
   }
