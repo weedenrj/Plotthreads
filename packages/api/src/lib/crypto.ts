@@ -25,9 +25,9 @@ export function encrypt(data: unknown): string {
   const authTag = cipher.getAuthTag()
 
   return [
-    iv.toString('base64'),
-    authTag.toString('base64'),
-    encrypted.toString('base64'),
+    iv.toString('base64url'),
+    authTag.toString('base64url'),
+    encrypted.toString('base64url'),
   ].join('.')
 }
 
@@ -39,9 +39,9 @@ export function decrypt(encrypted: string): unknown {
     throw new Error('Malformed encrypted data')
   }
 
-  const iv = Buffer.from(ivB64, 'base64')
-  const authTag = Buffer.from(authTagB64, 'base64')
-  const encryptedData = Buffer.from(encryptedB64, 'base64')
+  const iv = Buffer.from(ivB64, 'base64url')
+  const authTag = Buffer.from(authTagB64, 'base64url')
+  const encryptedData = Buffer.from(encryptedB64, 'base64url')
 
   const decipher = crypto.createDecipheriv(ALGORITHM, key, iv)
   decipher.setAuthTag(authTag)
