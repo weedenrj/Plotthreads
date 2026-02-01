@@ -1,0 +1,16 @@
+{$RAILWAY_STATIC_URL} {
+    # Proxy API requests to backend
+    handle /api/* {
+        uri strip_prefix /api
+        reverse_proxy https://api-production-0a1a.up.railway.app {
+            header_up Host api-production-0a1a.up.railway.app
+        }
+    }
+
+    # Serve static files
+    handle {
+        root * /app/dist
+        try_files {path} /index.html
+        file_server
+    }
+}

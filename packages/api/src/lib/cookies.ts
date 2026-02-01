@@ -63,8 +63,8 @@ export function serializeCookie(
 
 export const SESSION_COOKIE_OPTIONS: CookieOptions = {
   httpOnly: true,
-  secure: true,
-  sameSite: 'none',
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
   path: '/',
   maxAge: 30 * 24 * 60 * 60,
 }

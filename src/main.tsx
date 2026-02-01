@@ -31,7 +31,7 @@ function Root() {
     createTRPCClient<AppRouter>({
       links: [
         httpBatchLink({
-          url: import.meta.env.VITE_API_URL || 'http://localhost:3001',
+          url: import.meta.env.PROD ? '/api' : 'http://localhost:3001',
           fetch(url, options) {
             return fetch(url, { ...options, credentials: 'include' })
           },
