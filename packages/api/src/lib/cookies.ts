@@ -66,5 +66,6 @@ export const SESSION_COOKIE_OPTIONS: CookieOptions = {
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax',
   path: '/',
+  domain: process.env.COOKIE_DOMAIN,
   maxAge: 30 * 24 * 60 * 60,
 }
