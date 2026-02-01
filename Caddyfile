@@ -1,4 +1,4 @@
-{$RAILWAY_STATIC_URL} {
+:{$PORT:80} {
     # Proxy API requests to backend
     handle /api/* {
         uri strip_prefix /api
