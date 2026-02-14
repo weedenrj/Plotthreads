@@ -102,3 +102,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .btn-base {
+    @apply cursor-pointer select-none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-text {
+    color: var(--foreground);
+    transition-property: color;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+  .btn-text:hover {
+    color: var(--primary);
+  }
+}

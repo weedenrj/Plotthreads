@@ -1,0 +1,20 @@
+{
+  "name": "@plotthreads/railway",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts",
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "zod": "^3"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "tsup": "^8",
+    "tsx": "^4",
+    "typescript": "^5"
+  }
+}

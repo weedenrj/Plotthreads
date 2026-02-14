@@ -5,7 +5,10 @@ export function useAuth() {
   const trpc = useTRPC()
   const queryClient = useQueryClient()
 
-  const { data: user, isLoading } = useQuery(trpc.auth.me.queryOptions())
+  const { data: user, isLoading, isError } = useQuery({
+    ...trpc.auth.me.queryOptions(),
+    retry: false,
+  })
 
   const logoutMutation = useMutation({
     ...trpc.auth.logout.mutationOptions(),
@@ -21,7 +24,7 @@ export function useAuth() {
 
   return {
     user: user ?? null,
-    isLoading,
+    isLoading: isLoading && !isError,
     isAuthenticated: !!user,
     login,
     logout: () => logoutMutation.mutate(),

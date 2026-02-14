@@ -5,20 +5,20 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brandy-400 focus-visible:ring-offset-2 focus-visible:ring-offset-shadow-grey-950 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "btn-base btn-text inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brandy-400 focus-visible:ring-offset-2 focus-visible:ring-offset-shadow-grey-950 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
         default:
-          "bg-brandy-500 text-ivory-50 hover:bg-brandy-400 hover:shadow-lg hover:shadow-brandy-500/25",
+          "bg-brandy-500 text-ivory-50 hover:bg-brandy-400 hover:text-ivory-50 hover:shadow-lg hover:shadow-brandy-500/25 active:bg-brandy-600",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 active:bg-destructive/80",
         outline:
-          "border border-shadow-grey-700 bg-shadow-grey-900 text-ivory-100 hover:border-shadow-grey-600 hover:bg-shadow-grey-800",
+          "border border-shadow-grey-700 bg-shadow-grey-900 hover:border-shadow-grey-600 hover:bg-shadow-grey-800 active:bg-shadow-grey-700",
         secondary:
-          "bg-shadow-grey-800 text-ivory-100 hover:bg-shadow-grey-700",
-        ghost: "text-ivory-100 hover:bg-shadow-grey-800",
-        link: "text-brandy-400 underline-offset-4 hover:underline",
+          "bg-shadow-grey-800 hover:bg-shadow-grey-700 active:bg-shadow-grey-600",
+        ghost: "hover:bg-shadow-grey-800 active:bg-shadow-grey-700",
+        link: "text-brandy-400 hover:text-brandy-300 hover:underline active:opacity-80 underline-offset-4",
       },
       size: {
         default: "h-10 px-5 py-2.5 text-sm",
